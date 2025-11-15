@@ -39,3 +39,9 @@ Username
 Address
 Profile picture
 Dashboards are cleanly styled with inline CSS.
+
+### Technologies Used
+Python 3
+Django 5.2.8
+SQLite (default DB)
+HTML + Inline CSS
