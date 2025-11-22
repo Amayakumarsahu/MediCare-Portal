@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blogs</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f7ff;
+            padding: 30px;
+        }
+
+        .category-title {
+            font-size: 28px;
+            margin-top: 40px;
+            color: #1e4d9b;
+        }
+
+        .post-card {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        img {
+            width: 180px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Blogs by Category</h1>
+
+{% for category in categories %}
+    <h2 class="category-title">{{ category.name }}</h2>
+
+    {% for post in posts %}
+        {% if post.category.id == category.id %}
+            <div class="post-card">
+                <h3><a href="/blog/{{ post.id }}/" style="text-decoration:none;color:#0066cc;">{{ post.title }}</a></h3>
+
+
+                {% if post.image %}
+                    <img src="{{ post.image.url }}">
+                {% endif %}
+
+                <p>{{ post.short_summary }}</p>
+            </div>
+        {% endif %}
+    {% empty %}
+        <p>No posts available.</p>
+    {% endfor %}
+
+{% endfor %}
+
+</body>
+</html>

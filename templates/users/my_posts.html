@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Blog Posts</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #eaf7ff;
+            padding: 40px;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #0066cc;
+        }
+
+        .post-card {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        img {
+            width: 150px;
+            border-radius: 8px;
+        }
+
+        .draft-tag {
+            background: orange;
+            padding: 5px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>My Blog Posts</h2>
+
+<div class="container">
+    {% for post in posts %}
+        <div class="post-card">
+            <h3>
+                <a href="/blog/{{ post.id }}/" style="text-decoration:none; color:#0066cc;">
+                    {{ post.title }}
+                </a>
+            </h3>
+
+
+            {% if post.image %}
+                <img src="{{ post.image.url }}">
+            {% endif %}
+
+            <p><strong>Category:</strong> {{ post.category.name }}</p>
+            <p><strong>Summary:</strong> {{ post.short_summary }}</p>
+
+            {% if post.is_draft %}
+                <span class="draft-tag">DRAFT</span>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+</body>
+</html>

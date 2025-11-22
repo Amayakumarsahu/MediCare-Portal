@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Blog Post</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #eef1ff;
+            padding: 40px;
+        }
+
+        .form-box {
+            width: 600px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #3f51b5;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            background: #3f51b5;
+            padding: 12px;
+            color: white;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background: #3546a0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-box">
+    <h2>Create Blog Post</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <input type="text" name="title" placeholder="Blog Title" required>
+
+        <select name="category" required>
+        <option value="" disabled selected>-- Select Category --</option>
+            {% for cat in categories %}
+        <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+
+
+        <textarea name="summary" placeholder="Short Summary (15–50 words recommended)" required
+            style="min-height: 120px; width: 100%; font-size: 15px; padding: 12px; border-radius: 8px; border: 1px solid #ccc; line-height:1.5;"></textarea>
+
+
+        <textarea name="content" placeholder="Full Blog Content" required 
+            style="height: 250px; width: 100%; font-size: 16px; padding: 10px; border-radius: 8px; border: 1px solid #ccc;"></textarea>
+
+
+        <label>Upload Image:</label>
+        <input type="file" name="image">
+
+        <div style="margin-top:15px; display:flex; align-items:center; gap:10px;">
+        <input type="checkbox" name="is_draft" style="width:18px; height:18px;">
+        <label style="font-size:18px;">Mark as Draft</label>
+        </div>
+
+
+        <button type="submit">Upload Post</button>
+    </form>
+</div>
+
+</body>
+</html>

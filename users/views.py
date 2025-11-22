@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from .models import CustomUser
 from django.contrib import messages
+from django.http import HttpResponse
+from .models import BlogPost, Category, CustomUser
 
 def signup(request):
     if request.method == "POST":
@@ -66,12 +68,16 @@ def login(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        # Check if user exists
         try:
             user = CustomUser.objects.get(username=username, password=password)
         except CustomUser.DoesNotExist:
             messages.error(request, "Invalid username or password!")
             return render(request, "users/login.html")
+
+        #  Save session data
+        request.session["user_id"] = user.id
+        request.session["username"] = user.username
+        request.session["user_type"] = user.user_type   # <-- IMPORTANT
 
         # Redirect to respective dashboard
         if user.user_type == "patient":
@@ -81,6 +87,7 @@ def login(request):
 
     return render(request, "users/login.html")
 
+
 def patient_dashboard(request, user_id):
     user = CustomUser.objects.get(id=user_id)
     return render(request, "users/patient_dashboard.html", {"user": user})
@@ -89,4 +96,93 @@ def patient_dashboard(request, user_id):
 def doctor_dashboard(request, user_id):
     user = CustomUser.objects.get(id=user_id)
     return render(request, "users/doctor_dashboard.html", {"user": user})
+
+
+
+def create_blog(request):
+    # Ensure only doctors can access
+    if request.session.get("user_type").lower() != "doctor":
+
+        return HttpResponse("Access Denied: Only doctors can upload blogs.")
+
+    categories = Category.objects.all()
+
+    if request.method == "POST":
+        title = request.POST.get("title")
+        category_id = request.POST.get("category")
+        summary = request.POST.get("summary")
+        content = request.POST.get("content")
+        is_draft = True if request.POST.get("is_draft") == "on" else False
+        image = request.FILES.get("image")
+
+        user_id = request.session.get("user_id")
+        user = CustomUser.objects.get(id=user_id)
+
+        category_id = request.POST.get("category")
+        category = Category.objects.get(id=category_id)
+
+
+        # Save blog
+        blog = BlogPost(
+            title=title,
+            category=category,
+            summary=summary,
+            content=content,
+            author=user,
+            is_draft=is_draft
+        )
+
+        if image:
+            blog.image = image
+        
+        blog.save()
+
+        return HttpResponse("Blog uploaded successfully!")
+    
+    categories = Category.objects.all()
+    return render(request, "users/create_blog.html", {"categories": categories})
+
+
+def my_posts(request):
+    # Ensure only doctors can access
+    if request.session.get("user_type") != "doctor":
+        return HttpResponse("Access Denied: Only doctors can view their posts.")
+
+    user_id = request.session.get("user_id")
+    posts = BlogPost.objects.filter(author_id=user_id)
+
+    return render(request, "users/my_posts.html", {"posts": posts})
+
+def view_blogs(request):
+    # Only visible to patients
+    if request.session.get("user_type", "").lower() != "patient":
+        return HttpResponse("Access Denied: Only patients can view blogs.")
+
+    categories = Category.objects.all()
+
+    # Fetch only published posts (not drafts)
+    posts = BlogPost.objects.filter(is_draft=False)
+
+    return render(request, "users/view_blogs.html", {
+        "categories": categories,
+        "posts": posts
+    })
+
+
+def full_blog(request, post_id):
+
+    # Allow both doctor and patient, just require login
+    if request.session.get("user_type") is None:
+        return HttpResponse("Please login to read blogs.")
+
+    try:
+        post = BlogPost.objects.get(id=post_id)
+    except BlogPost.DoesNotExist:
+        return HttpResponse("Blog not found.")
+
+    # Prevent patients from reading drafts
+    if post.is_draft and request.session.get("user_type") != "doctor":
+        return HttpResponse("This post is not published yet.")
+
+    return render(request, "users/full_blog.html", {"post": post})
 
